@@ -2,14 +2,15 @@ package helper
 
 import (
 	"context"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func OpenMongoDB(ctx context.Context) (*mongo.Database, error) {
+func OpenMongoDB(ctx context.Context, conf Config) (*mongo.Database, error) {
 	clientOptions := options.Client()
-	clientOptions.ApplyURI("")
+	clientOptions.ApplyURI(conf.DBAddress)
 	client, err := mongo.NewClient(clientOptions)
 
 	if err != nil {
@@ -20,8 +21,8 @@ func OpenMongoDB(ctx context.Context) (*mongo.Database, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	db := client.Database("auth_db")
+	fmt.Println(conf)
+	db := client.Database(conf.DBName)
 
 	return db, nil
 }

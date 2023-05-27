@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	userHTTP "github.com/jwilyandi19/simple-auth-v2/delivery/http/user"
@@ -21,18 +20,15 @@ func main() {
 
 	ctx := context.TODO()
 
-	db, err := helper.OpenMongoDB(ctx)
-	dbClient := *db
+	db, err := helper.OpenMongoDB(ctx, config)
 	if err != nil {
 		log.Fatal("cannot open db: ", err)
 	}
 
-	fmt.Println(config)
-
 	r := echo.New()
 	r.Use(middleware.Recover())
 
-	userRepo := userRepository.NewUserRepository(dbClient)
+	userRepo := userRepository.NewUserRepository(db)
 	userUsecase := userUsecase.NewUserUsecase(userRepo)
 	userHTTP.NewUserHandler(r, userUsecase)
 
