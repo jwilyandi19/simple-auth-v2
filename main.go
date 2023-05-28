@@ -30,7 +30,7 @@ func main() {
 
 	userRepo := userRepository.NewUserRepository(db)
 	userUsecase := userUsecase.NewUserUsecase(userRepo)
-	userHTTP.NewUserHandler(r, userUsecase)
+	userHTTP.NewUserHandler(r, userUsecase, config)
 
 	port := ":8080"
 	r.Start(port)

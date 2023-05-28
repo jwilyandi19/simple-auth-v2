@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"errors"
 
 	"github.com/jwilyandi19/simple-auth-v2/domain/user"
 	"github.com/jwilyandi19/simple-auth-v2/helper"
@@ -13,6 +14,7 @@ type UserUsecase interface {
 	GetByID(ctx context.Context, id string) (*user.User, error)
 	GetAll(ctx context.Context) ([]user.User, error)
 	Update(ctx context.Context, id string, user *user.User) (*user.User, error)
+	Login(ctx context.Context, username string, password string) (*user.User, error)
 }
 
 type userUsecase struct {
@@ -65,4 +67,17 @@ func (u *userUsecase) Update(ctx context.Context, id string, user *user.User) (*
 		return res, err
 	}
 	return res, nil
+}
+
+func (u *userUsecase) Login(ctx context.Context, username string, password string) (*user.User, error) {
+	user, err := u.userRepo.Login(ctx, username)
+
+	check := helper.CheckPasswordHash(password, user.Password)
+	if !check {
+		return user, errors.New("password wrong")
+	}
+	if err != nil {
+		return user, err
+	}
+	return user, nil
 }

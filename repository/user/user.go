@@ -16,6 +16,7 @@ type UserRepository interface {
 	GetAll(ctx context.Context) ([]domain.User, error)
 	Create(ctx context.Context, user *domain.User) (*domain.User, error)
 	Update(ctx context.Context, user *domain.User, id string) (*domain.User, error)
+	Login(ctx context.Context, username string) (*domain.User, error)
 }
 
 type userRepository struct {
@@ -107,6 +108,7 @@ func (u *userRepository) Update(ctx context.Context, user *domain.User, id strin
 		"name":       user.Name,
 		"username":   user.Username,
 		"password":   user.Password,
+		"is_admin":   user.IsAdmin,
 		"updated_at": time.Now(),
 	}}
 
@@ -117,4 +119,22 @@ func (u *userRepository) Update(ctx context.Context, user *domain.User, id strin
 	}
 
 	return user, nil
+}
+
+func (u *userRepository) Login(ctx context.Context, username string) (*domain.User, error) {
+	collection := u.db.Collection("users")
+
+	filter := bson.M{
+		"username": username,
+	}
+
+	var user domain.User
+	err := collection.FindOne(ctx, filter).Decode(&user)
+	if err != nil {
+		log.Println("[UserRepository-Login] Wrong username + password with err", err)
+		return nil, err
+	}
+
+	return &user, nil
+
 }
