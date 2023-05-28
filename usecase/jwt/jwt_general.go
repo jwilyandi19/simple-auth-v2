@@ -2,44 +2,43 @@ package jwt
 
 import (
 	"context"
+	"log"
 	"net/http"
+	"strings"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/jwilyandi19/simple-auth-v2/helper"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
-
-func (j *jwtUsecase) SetJwtGeneral(g *echo.Group) {
-	secret := j.Config.JWTSecret
-
-	g.Use(middleware.JWTWithConfig(middleware.JWTConfig{
-		SigningMethod: "HS512",
-		SigningKey:    []byte(secret),
-	}))
-
-	g.Use(j.ValidateGeneralJwt)
-}
 
 func (j *jwtUsecase) ValidateGeneralJwt(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		user := c.Get("user")
-		token := user.(*jwt.Token)
+		tokenString := c.Request().Header.Get("Authorization")
+		tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
-		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			if claims["is_admin"] == true {
+		token, err := jwt.ParseWithClaims(tokenString, &helper.JwtClaims{}, func(t *jwt.Token) (interface{}, error) {
+			return []byte(j.Config.JWTSecret), nil
+		})
+
+		if err != nil {
+			log.Println("Error parsing: ", err.Error())
+			return err
+		}
+
+		if claims, ok := token.Claims.(*helper.JwtClaims); ok {
+			if claims.IsAdmin {
 				return next(c)
 			} else {
-				mid, ok := claims["jti"].(string)
-				if !ok {
-					return echo.NewHTTPError(http.StatusForbidden, "something wrong with your token id")
-				}
+				id := c.Param("id")
+				mid := claims.Username
 				ctx := context.TODO()
-				user, err := j.getUserByID(ctx, mid)
+				_, err := j.getUserByID(ctx, mid)
 				if err != nil {
 					return echo.NewHTTPError(http.StatusForbidden, "forbidden")
 				}
-
-				c.Set("user", user)
+				if id != mid {
+					return echo.NewHTTPError(http.StatusForbidden, "forbidden")
+				}
 			}
 			return next(c)
 		}

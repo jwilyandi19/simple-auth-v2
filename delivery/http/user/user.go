@@ -7,6 +7,7 @@ import (
 
 	domain "github.com/jwilyandi19/simple-auth-v2/domain/user"
 	"github.com/jwilyandi19/simple-auth-v2/helper"
+	"github.com/jwilyandi19/simple-auth-v2/usecase/jwt"
 	"github.com/jwilyandi19/simple-auth-v2/usecase/user"
 	"github.com/labstack/echo/v4"
 )
@@ -36,25 +37,18 @@ type UserHandler struct {
 	Config      helper.Config
 }
 
-func NewUserHandler(e *echo.Echo, uu user.UserUsecase, config helper.Config) {
+func NewUserHandler(e *echo.Echo, uu user.UserUsecase, config helper.Config, jwt jwt.JwtUsecase) {
 	handler := &UserHandler{
 		UserUsecase: uu,
 		Config:      config,
 	}
 
-	e.GET("/user/:id", handler.GetByID)
+	e.GET("/user/:id", handler.GetByID, jwt.ValidateGeneralJwt)
 	e.POST("/user/auth", handler.Login)
-	e.POST("/user", handler.Create)
-	e.PUT("/user", handler.Update)
-	e.GET("/user", handler.GetAll)
+	e.POST("/user", handler.Create, jwt.ValidateAdminJwt)
+	e.PUT("/user", handler.Update, jwt.ValidateGeneralJwt)
+	e.GET("/user", handler.GetAll, jwt.ValidateAdminJwt)
 }
-
-//Route
-//GET /user/:id (GetByID) (User logged in only)
-//POST /user/auth (Login) (No need to login)
-//POST /user (Create) (No need to login)
-//PUT /user (Update) (Admin + user logged in only)
-//GET /user (GetAll) (Admin only)
 
 func (u *UserHandler) GetByID(c echo.Context) error {
 	id := c.Param("id")

@@ -10,7 +10,8 @@ import (
 )
 
 type JwtUsecase interface {
-	SetJwtGeneral(g *echo.Group)
+	ValidateGeneralJwt(next echo.HandlerFunc) echo.HandlerFunc
+	ValidateAdminJwt(next echo.HandlerFunc) echo.HandlerFunc
 }
 
 type jwtUsecase struct {
