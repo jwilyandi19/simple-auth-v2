@@ -83,14 +83,20 @@ func (u *UserHandler) Login(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, err.Error())
 	}
 
-	token, err := helper.CreateJWTToken(res.ID.Hex(), res.IsAdmin, u.Config.JWTSecret)
+	accessToken, err := helper.CreateJWTToken(res.ID.Hex(), res.IsAdmin, u.Config.JWTSecret)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	refreshToken, err := helper.CreateJWTToken(res.ID.Hex(), res.IsAdmin, u.Config.JWTSecret)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"token":      token,
-		"expires_in": 60,
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
+		"expires_in":    60,
 	})
 }
 

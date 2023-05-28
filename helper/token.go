@@ -34,3 +34,25 @@ func CreateJWTToken(username string, isAdmin bool, secret string) (string, error
 	return tokenString, nil
 
 }
+
+func CreateJWTRefreshToken(username string, isAdmin bool, secret string) (string, error) {
+	expirationTime := time.Now().Add(7 * 24 * time.Hour)
+
+	claims := &JwtClaims{
+		Username: username,
+		IsAdmin:  isAdmin,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expirationTime),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString([]byte(secret))
+	if err != nil {
+		log.Println("Can't sign token: ", err.Error())
+		return "", err
+	}
+
+	return tokenString, nil
+
+}
