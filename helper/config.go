@@ -7,9 +7,11 @@ import (
 )
 
 type Config struct {
-	DBAddress string `mapstructure:"DB_ADDRESS"`
-	DBName    string `mapstructure:"DB_NAME"`
-	JWTSecret string `mapstructure:"JWT_SECRET"`
+	DBAddress     string `mapstructure:"DB_ADDRESS"`
+	DBName        string `mapstructure:"DB_NAME"`
+	JWTSecret     string `mapstructure:"JWT_SECRET"`
+	AdminUsername string `mapstructure:"ADMIN_USERNAME"`
+	AdminPassword string `mapstructure:"ADMIN_PASSWORD"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

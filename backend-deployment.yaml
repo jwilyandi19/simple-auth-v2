@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-auth-v2-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-auth-v2
+  template:
+    metadata:
+      labels:
+        app: simple-auth-v2
+    spec:
+      containers:
+        - name: simple-auth-v2
+          image: hunterjj/simple-auth-v2 # Replace with your Docker image name
+          ports:
+            - containerPort: 8080 # Replace with the appropriate port
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-auth-v2-service
+spec:
+  selector:
+    app: simple-auth-v2
+  ports:
+    - protocol: TCP
+      port: 8080 # Replace with the appropriate port
+      targetPort: 8080 # Replace with the appropriate port
+  type: NodePort # Change to LoadBalancer if needed
