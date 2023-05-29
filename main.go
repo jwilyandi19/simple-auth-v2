@@ -37,10 +37,15 @@ func main() {
 		Name:     "Admin",
 		Username: config.AdminUsername,
 		Password: config.AdminPassword,
+		IsAdmin:  true,
 	}
-	_, err = userUsecase.Create(ctx, userSeed)
-	if err != nil {
-		log.Fatal("cannot create seed user ", err)
+
+	user, _ := userUsecase.CheckByUsername(ctx, config.AdminUsername)
+	if user == nil {
+		_, err = userUsecase.Create(ctx, userSeed)
+		if err != nil {
+			log.Fatal("cannot create seed user ", err)
+		}
 	}
 
 	jwtUsecase := jwtUsecase.NewJWTUsecase(userRepo, config)

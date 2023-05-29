@@ -15,6 +15,7 @@ type UserUsecase interface {
 	GetAll(ctx context.Context) ([]user.User, error)
 	Update(ctx context.Context, id string, user *user.User) (*user.User, error)
 	Login(ctx context.Context, username string, password string) (*user.User, error)
+	CheckByUsername(ctx context.Context, username string) (*user.User, error)
 }
 
 type userUsecase struct {
@@ -71,13 +72,23 @@ func (u *userUsecase) Update(ctx context.Context, id string, user *user.User) (*
 
 func (u *userUsecase) Login(ctx context.Context, username string, password string) (*user.User, error) {
 	user, err := u.userRepo.Login(ctx, username)
+	if err != nil {
+		return user, err
+	}
 
 	check := helper.CheckPasswordHash(password, user.Password)
 	if !check {
 		return user, errors.New("password wrong")
 	}
+
+	return user, nil
+}
+
+func (u *userUsecase) CheckByUsername(ctx context.Context, username string) (*user.User, error) {
+	user, err := u.userRepo.Login(ctx, username)
 	if err != nil {
 		return user, err
 	}
+
 	return user, nil
 }
