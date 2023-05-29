@@ -88,7 +88,7 @@ func (u *UserHandler) Login(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	refreshToken, err := helper.CreateJWTToken(res.ID.Hex(), res.IsAdmin, u.Config.JWTSecret)
+	refreshToken, err := helper.CreateJWTRefreshToken(res.ID.Hex(), res.IsAdmin, u.Config.JWTSecret)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
